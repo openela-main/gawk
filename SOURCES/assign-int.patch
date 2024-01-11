@@ -1,0 +1,193 @@
+From c1f670b26671cc8d60d967bbcb42cb8deb3baf2b Mon Sep 17 00:00:00 2001
+From: "Arnold D. Robbins" <arnold@skeeve.com>
+Date: Tue, 31 Jul 2018 21:40:49 +0300
+Subject: Fix assigning $0 from a number.
+
+---
+ ChangeLog               |  6 ++++++
+ interpret.h             |  1 +
+ test/ChangeLog          |  5 +++++
+ test/Makefile.am        |  5 ++++-
+ test/Makefile.in        | 10 +++++++++-
+ test/Maketests          |  5 +++++
+ test/assignnumfield.awk |  1 +
+ test/assignnumfield.in  |  5 +++++
+ test/assignnumfield.ok  |  5 +++++
+ 9 files changed, 41 insertions(+), 2 deletions(-)
+ create mode 100644 test/assignnumfield.awk
+ create mode 100644 test/assignnumfield.in
+ create mode 100644 test/assignnumfield.ok
+
+diff --git a/ChangeLog b/ChangeLog
+index 904e984c..68210057 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -1,3 +1,9 @@
++2018-07-31         Arnold D. Robbins     <arnold@skeeve.com>
++
++	* interpret.h (unfield): Add a call to force_string() on
++	new value. See test/assignnumfield.awk. Thanks to
++	Ralph Corderoy <ralph@inputplus.co.uk> for the bug report.
++
+ 2018-02-25         Arnold D. Robbins     <arnold@skeeve.com>
+ 
+ 	* 4.2.1: Release tar ball made.
+diff --git a/interpret.h b/interpret.h
+index 8408a532..fed0078c 100644
+--- a/interpret.h
++++ b/interpret.h
+@@ -46,16 +46,25 @@ unfield(NODE **l, NODE **r)
+  * valref 1, that effectively means that this is an assignment like "$n = $n",
+  * so a no-op, other than triggering $0 reconstitution.
+  */
+-#define UNFIELD(l, r) \
+-{ \
+-	/* if was a field, turn it into a var */ \
+-	if ((r->flags & MALLOC) != 0 || r->valref == 1) { \
+-		l = r; \
+-	} else { \
+-		l = dupnode(r); \
+-		DEREF(r); \
+-	} \
+-}
++// not a macro so we can step into it with a debugger
++#ifndef UNFIELD_DEFINED
++#define UNFIELD_DEFINED 1
++static inline void
++unfield(NODE **l, NODE **r)
++{
++	/* if was a field, turn it into a var */
++	if (((*r)->flags & MALLOC) != 0 || (*r)->valref == 1) {
++		(*l) = (*r);
++	} else {
++		(*l) = dupnode(*r);
++		DEREF(*r);
++	}
++	force_string(*l);
++}
++
++#define UNFIELD(l, r)	unfield(& (l), & (r))
++#endif
++
+ int
+ r_interpret(INSTRUCTION *code)
+ {
+diff --git a/test/ChangeLog b/test/ChangeLog
+index 392d593b..2af89e66 100644
+--- a/test/ChangeLog
++++ b/test/ChangeLog
+@@ -1,3 +1,8 @@
++2018-07-31         Arnold D. Robbins     <arnold@skeeve.com>
++
++	* Makefile.am (EXTRA_DIST): Add assignnumfield files.
++	* assignnumfield.awk, assignnumfield.in, assignnumfield.ok: New files.
++
+ 2018-02-25         Arnold D. Robbins     <arnold@skeeve.com>
+ 
+ 	* 4.2.1: Release tar ball made.
+diff --git a/test/Makefile.am b/test/Makefile.am
+index e6f1e223..774424f7 100644
+--- a/test/Makefile.am
++++ b/test/Makefile.am
+@@ -121,6 +121,9 @@ EXTRA_DIST = \
+ 	asort.ok \
+ 	asorti.awk \
+ 	asorti.ok \
++	assignnumfield.awk \
++	assignnumfield.in \
++	assignnumfield.ok \
+ 	awkpath.ok \
+ 	back89.awk \
+ 	back89.in \
+@@ -1235,7 +1238,7 @@ BASIC_TESTS = \
+ 	addcomma anchgsub anchor argarray arrayind1 arrayind2 arrayind3 arrayparm \
+ 	arrayprm2 arrayprm3 arrayref arrymem1 arryref2 arryref3 arryref4 arryref5 \
+ 	arynasty arynocls aryprm1 aryprm2 aryprm3 aryprm4 aryprm5 aryprm6 aryprm7 \
+-	aryprm8 aryprm9 arysubnm aryunasgn asgext awkpath \
++	aryprm8 aryprm9 arysubnm aryunasgn asgext awkpath assignnumfield \
+ 	back89 backgsub badassign1 badbuild \
+ 	callparam childin clobber closebad clsflnam compare compare2 \
+ 	concat1 concat2 concat3 concat4 concat5 convfmt \
+diff --git a/test/Makefile.in b/test/Makefile.in
+index 532aca07..69b86d07 100644
+--- a/test/Makefile.in
++++ b/test/Makefile.in
+@@ -379,6 +379,9 @@ EXTRA_DIST = \
+ 	asort.ok \
+ 	asorti.awk \
+ 	asorti.ok \
++	assignnumfield.awk \
++	assignnumfield.in \
++	assignnumfield.ok \
+ 	awkpath.ok \
+ 	back89.awk \
+ 	back89.in \
+@@ -1493,7 +1496,7 @@ BASIC_TESTS = \
+ 	addcomma anchgsub anchor argarray arrayind1 arrayind2 arrayind3 arrayparm \
+ 	arrayprm2 arrayprm3 arrayref arrymem1 arryref2 arryref3 arryref4 arryref5 \
+ 	arynasty arynocls aryprm1 aryprm2 aryprm3 aryprm4 aryprm5 aryprm6 aryprm7 \
+-	aryprm8 aryprm9 arysubnm aryunasgn asgext awkpath \
++	aryprm8 aryprm9 arysubnm aryunasgn asgext awkpath assignnumfield \
+ 	back89 backgsub badassign1 badbuild \
+ 	callparam childin clobber closebad clsflnam compare compare2 \
+ 	concat1 concat2 concat3 concat4 concat5 convfmt \
+@@ -2787,6 +2790,11 @@ asgext:
+ 	@AWKPATH="$(srcdir)" $(AWK) -f $@.awk  < "$(srcdir)"/$@.in >_$@ 2>&1 || echo EXIT CODE: $$? >>_$@
+ 	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
+ 
++assignnumfield:
++	@echo $@
++	@AWKPATH="$(srcdir)" $(AWK) -f $@.awk  < "$(srcdir)"/$@.in >_$@ 2>&1 || echo EXIT CODE: $$? >>_$@
++	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
++
+ back89:
+ 	@echo $@
+ 	@AWKPATH="$(srcdir)" $(AWK) -f $@.awk  < "$(srcdir)"/$@.in >_$@ 2>&1 || echo EXIT CODE: $$? >>_$@
+diff --git a/test/Maketests b/test/Maketests
+index 8c604222..eb7c4651 100644
+--- a/test/Maketests
++++ b/test/Maketests
+@@ -140,6 +140,11 @@ asgext:
+ 	@AWKPATH="$(srcdir)" $(AWK) -f $@.awk  < "$(srcdir)"/$@.in >_$@ 2>&1 || echo EXIT CODE: $$? >>_$@
+ 	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
+ 
++assignnumfield:
++	@echo $@
++	@AWKPATH="$(srcdir)" $(AWK) -f $@.awk  < "$(srcdir)"/$@.in >_$@ 2>&1 || echo EXIT CODE: $$? >>_$@
++	@-$(CMP) "$(srcdir)"/$@.ok _$@ && rm -f _$@
++
+ back89:
+ 	@echo $@
+ 	@AWKPATH="$(srcdir)" $(AWK) -f $@.awk  < "$(srcdir)"/$@.in >_$@ 2>&1 || echo EXIT CODE: $$? >>_$@
+diff --git a/test/assignnumfield.awk b/test/assignnumfield.awk
+new file mode 100644
+index 00000000..3a056cb0
+--- /dev/null
++++ b/test/assignnumfield.awk
+@@ -0,0 +1 @@
++{$0 = ++i} 1
+diff --git a/test/assignnumfield.in b/test/assignnumfield.in
+new file mode 100644
+index 00000000..b82c4b2d
+--- /dev/null
++++ b/test/assignnumfield.in
+@@ -0,0 +1,5 @@
++a b c
++a b c
++a b c
++a b c
++a b c
+diff --git a/test/assignnumfield.ok b/test/assignnumfield.ok
+new file mode 100644
+index 00000000..8a1218a1
+--- /dev/null
++++ b/test/assignnumfield.ok
+@@ -0,0 +1,5 @@
++1
++2
++3
++4
++5
+-- 
+cgit v1.2.1
+
