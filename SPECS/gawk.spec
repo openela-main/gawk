@@ -47,7 +47,7 @@
 Name:             gawk
 Summary:          The GNU version of the AWK text processing utility
 Version:          5.1.0
-Release:          6%{?dist}
+Release:          6%{?dist}.1
 
 License:          GPLv3+ and GPLv2+ and LGPLv2+ and BSD
 
@@ -120,6 +120,18 @@ Patch001: proc-rv.patch
 
 #Patch008: gawk-api-version.patch
 
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=cca0366144336b49aaa7d5d949966ce8e2c70843
+Patch002: CVE-2026-40553-part1.patch
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=bfa2e4b890a44100a99d26b54af385479528b12e
+Patch003: CVE-2026-40553-part2.patch
+
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=a2d18c74109e41bec29a23098eba2e00057286d8
+Patch004: CVE-2026-40467.patch
+
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=062f2f2581b991362c046f7f2e238ffa34e6f8c7
+Patch005: CVE-2026-40468-part1.patch
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=aa7272a6e1184cdd21ab8f89200219abd8053eda
+Patch006: CVE-2026-40468-part2.patch
 
 
 # Downstream patches -- these should be always included when doing rebase:
@@ -289,6 +301,14 @@ install -m 0644 -p doc/gawkinet.{pdf,ps} %{buildroot}%{_docdir}/%{name}
 # =============================================================================
 
 %changelog
+* Fri Aug 21 2026 Jakub Martisko <jamartis@redhat.com> - 5.1.0-6.1
+- Fix use after free in io.c
+- Fix buffer overflow in extensions/readdir.c
+- Fix integer overflow in buildin.c
+Resolves: CVE-2026-40467
+Resolves: CVE-2026-40468
+Resolves: CVE-2026-40553
+
 * Wed Feb 16 2022 Jakub Martisko <jamartis@redhat.com> - 5.1.0-6
 Fix the issue with incorect handling of return values of some processes
 Resolves: rhbz#2055107
