@@ -47,7 +47,7 @@
 Name:             gawk
 Summary:          The GNU version of the AWK text processing utility
 Version:          5.3.0
-Release:          6%{?dist}
+Release:          6%{?dist}.1
 
 License:          GPL-3.0-or-later AND GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause
 
@@ -114,6 +114,19 @@ BuildRequires: make
 # Upstream patches -- official upstream patches released by upstream since the
 # ----------------    last rebase that are necessary for any reason:
 #Patch000: example000.patch
+
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=cca0366144336b49aaa7d5d949966ce8e2c70843
+Patch001: CVE-2026-40553-part1.patch
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=bfa2e4b890a44100a99d26b54af385479528b12e
+Patch002: CVE-2026-40553-part2.patch
+
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=a2d18c74109e41bec29a23098eba2e00057286d8
+Patch003: CVE-2026-40467.patch
+
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=062f2f2581b991362c046f7f2e238ffa34e6f8c7
+Patch004: CVE-2026-40468-part1.patch
+#https://cgit.git.savannah.gnu.org/cgit/gawk.git/commit/?id=aa7272a6e1184cdd21ab8f89200219abd8053eda
+Patch005: CVE-2026-40468-part2.patch
 
 #Parts of the patch dealing with .info files, were removed, some parts of documentation might be broken
 
@@ -295,6 +308,14 @@ install -m 0644 -p awklib/eg/data/* %{buildroot}%{_docdir}/%{name}/eg/data/
 # =============================================================================
 
 %changelog
+* Fri Aug 21 2026 Jakub Martisko <jamartis@redhat.com> - 5.3.0-6.1
+- Fix use after free in io.c
+- Fix buffer overflow in extensions/readdir.c
+- Fix integer overflow in buildin.c
+Resolves: CVE-2026-40467
+Resolves: CVE-2026-40468
+Resolves: CVE-2026-40553
+
 * Tue Oct 29 2024 Troy Dawson <tdawson@redhat.com> - 5.3.0-6
 - Bump release for October 2024 mass rebuild:
   Resolves: RHEL-64018
