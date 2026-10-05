@@ -44,7 +44,7 @@
 Name:             gawk
 Summary:          The GNU version of the AWK text processing utility
 Version:          4.2.1
-Release:          4%{?dist}
+Release:          5%{?dist}
 
 License:          GPLv3+ and GPLv2+ and LGPLv2+ and BSD
 
@@ -106,6 +106,14 @@ BuildRequires:    bison
 #Patch000: example000.patch
 Patch000: assign-int.patch
 Patch001: proc-rv.patch
+
+# https://github.com/sysfce2/gawk/commit/062f2f2581b991362c046f7f2e238ffa34e6f8c7
+# https://github.com/sysfce2/gawk/commit/aa7272a6e1184cdd21ab8f89200219abd8053eda
+Patch002: gawk-4.2.1-CVE-2026-40468.patch
+
+# https://issues.redhat.com/browse/RHEL-222601
+# https://cgit.git.savannah.gnu.org/cgit/gawk.git/patch/?id=a2d18c74109e41bec29a23098eba2e00057286d8
+Patch003: gawk-4.2.1-CVE-2026-40467.patch
 
 # Downstream patches -- these should be always included when doing rebase:
 # ------------------
@@ -257,6 +265,14 @@ install -m 0644 -p doc/gawkinet.{pdf,ps} %{buildroot}%{_docdir}/%{name}
 # =============================================================================
 
 %changelog
+* Fri Sep 04 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 4.2.1-5
+- Fix use-after-free in do_getline_redir() (CVE-2026-40467)
+Resolves: RHEL-222601
+
+* Mon Aug 03 2026 RHEL Packaging Agent <redhat-ymir-agent@redhat.com> - 4.2.1-4.1
+- Fix integer overflow in do_sub() and parse_escape() (CVE-2026-40468)
+Resolves: RHEL-222771
+
 * Fri Feb 11 2022 Jakub Martisko <jamartis@redhat.com> - 4.2.1-4
 - Rebuild with some gating tests disabled
 Resolves: rhbz#2053515
