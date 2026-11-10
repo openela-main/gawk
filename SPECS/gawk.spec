@@ -47,7 +47,7 @@
 Name:             gawk
 Summary:          The GNU version of the AWK text processing utility
 Version:          5.3.0
-Release:          6%{?dist}.1
+Release:          7%{?dist}
 
 License:          GPL-3.0-or-later AND GPL-2.0-or-later AND LGPL-2.1-or-later AND BSD-3-Clause
 
@@ -308,7 +308,7 @@ install -m 0644 -p awklib/eg/data/* %{buildroot}%{_docdir}/%{name}/eg/data/
 # =============================================================================
 
 %changelog
-* Fri Aug 21 2026 Jakub Martisko <jamartis@redhat.com> - 5.3.0-6.1
+* Fri Aug 21 2026 Jakub Martisko <jamartis@redhat.com> - 5.3.0-7
 - Fix use after free in io.c
 - Fix buffer overflow in extensions/readdir.c
 - Fix integer overflow in buildin.c
